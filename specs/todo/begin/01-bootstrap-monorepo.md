@@ -31,7 +31,7 @@
 
 ## 1. Configurar el monorepo
 
-- [ ] `package.json` raíz:
+- [x] `package.json` raíz:
 
 ```jsonc
 {
@@ -53,25 +53,25 @@
 }
 ```
 
-- [ ] `pnpm-workspace.yaml`: `apps/*`, `packages/*`.
-- [ ] `turbo.json` con tasks `dev`, `build`, `lint`, `test`, `typecheck`.
-- [ ] `tsconfig.base.json` raíz con `strict`, `noUncheckedIndexedAccess`,
+- [x] `pnpm-workspace.yaml`: `apps/*`, `packages/*`.
+- [x] `turbo.json` con tasks `dev`, `build`, `lint`, `test`, `typecheck`.
+- [x] `tsconfig.base.json` raíz con `strict`, `noUncheckedIndexedAccess`,
   `noImplicitOverride`, `declaration`, `esModuleInterop`, `moduleResolution: node`.
-- [ ] `.nvmrc` con `22`, `.editorconfig`, `.prettierrc`.
-- [ ] `pnpm install` desde la raíz.
+- [x] `.nvmrc` con `22`, `.editorconfig`, `.prettierrc`.
+- [x] `pnpm install` desde la raíz.
 
 > En esta fase **no** se crea `apps/api` (fase 02).
 
 ## 2. Variables de entorno
 
-- [ ] `.env.example` en la raíz con **todas** las claves de
+- [x] `.env.example` en la raíz con **todas** las claves de
   [`stack.md`](../../stack.md) §6 (App, Database, Ingesta, Endpoint dinámico).
-- [ ] Copiar a `.env` (ignorado) y completar `MONGODB_URI`.
-- [ ] Regla: los secretos se validan con Joi al arrancar (fase 02) y nunca se commitean.
+- [x] Copiar a `.env` (ignorado) y completar `MONGODB_URI`.
+- [x] Regla: los secretos se validan con Joi al arrancar (fase 02) y nunca se commitean.
 
 ## 3. `docker-compose.yml`
 
-- [ ] Servicio `mongo` con `mongo:7`, auth activada, volumen, healthcheck y red propia.
+- [x] Servicio `mongo` con `mongo:7`, auth activada, volumen, healthcheck y red propia.
 
 ```yaml
 services:
@@ -100,20 +100,20 @@ networks:
     driver: bridge
 ```
 
-- [ ] Validar con `docker compose config`.
+- [x] Validar con `docker compose config`.
 
 ## 4. Levantar y verificar
 
-- [ ] `docker compose up -d` y `docker compose ps` (todo `healthy`).
-- [ ] Conectar:
+- [x] `docker compose up -d` y `docker compose ps` (todo `healthy`).
+- [x] Conectar:
   `docker exec -it datosapi-mongo mongosh -u datosapi -p change_me --authenticationDatabase admin datosapi --eval "db.runCommand({ping:1})"`.
-- [ ] Persistencia: `docker compose down` + `up -d` y los datos sobreviven.
+- [x] Persistencia: `docker compose down` + `up -d` y los datos sobreviven.
 
 ## 5. Criterios de aceptación
 
-- [ ] `pnpm install` corre sin errores.
-- [ ] `docker compose up -d` levanta MongoDB y pasa el healthcheck.
-- [ ] `.env.example` documenta **todas** las variables; `.env` y `storage/` ignorados.
+- [x] `pnpm install` corre sin errores.
+- [x] `docker compose up -d` levanta MongoDB y pasa el healthcheck.
+- [x] `.env.example` documenta **todas** las variables; `.env` y `storage/` ignorados.
 
 ## 6. Commit y push
 
@@ -128,5 +128,25 @@ Abrir PR hacia `main`.
 
 ## 7. Estado y decisiones
 
-- Fecha de ejecución: **<AGREGAR>**
-- `<AGREGAR: versiones instaladas, puertos, desvíos>`
+- Fecha de ejecución: **2026-10-01**
+- Versiones instaladas: Node v24.14.0 (el repo declara `.nvmrc` 22 y `engines >=22`), pnpm
+  9.0.0, turbo 2.11.6, TypeScript 5.9.3, Prettier 3.9.9, Docker Compose v5.1.0, `mongo:7`.
+- Puertos: API `3001` (fase 02), MongoDB `27017` publicado; `MONGO_PORT` quedó en
+  `.env.example` por si el puerto está ocupado.
+- Credenciales locales: `MONGO_ROOT_USER=datosapi`, `MONGO_ROOT_PASSWORD=change_me`,
+  `MONGO_DB=datosapi`. Son valores de desarrollo; fuera de dev van como secretos del
+  orquestador.
+- Verificado: `docker compose config` válido, healthcheck `healthy`, `ping` OK y el volumen
+  sobrevive a `down` + `up -d` (se insertó y leyó un documento de prueba; luego se dropeó la
+  colección).
+- Desvíos respecto del compose del spec:
+  - Se agregó `name: datosapi` y defaults `${VAR:-valor}` para que `docker compose config`
+    valide sin `.env` presente. El resultado es equivalente al del spec.
+  - El healthcheck incluye `--username/--password/--authenticationDatabase`: sin eso `ping`
+    falla en una instancia con auth activada.
+  - `MONGO_PORT` se agregó a `.env.example` para poder mapear otro puerto del host.
+  - `.prettierignore` excluye `*.md`: el wrapping manual de los specs es intencional y
+    Prettier lo reformatea en masa. `pnpm format` sólo cubre código y config.
+- `pnpm lint`, `pnpm typecheck` y `pnpm build` corren en verde vía turbo pero reportan `0
+  tasks`: todavía no hay ningún workspace. `apps/api` llega en la fase 02 y los paquetes en
+  la 03.

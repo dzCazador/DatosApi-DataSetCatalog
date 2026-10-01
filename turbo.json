@@ -1,0 +1,43 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
+  "globalEnv": [
+    "NODE_ENV",
+    "API_PORT",
+    "API_PREFIX",
+    "CORS_ORIGINS",
+    "MONGO_ROOT_USER",
+    "MONGO_ROOT_PASSWORD",
+    "MONGO_DB",
+    "MONGO_PORT",
+    "MONGODB_URI",
+    "INGEST_TIMEOUT_MS",
+    "INGEST_MAX_BYTES",
+    "INGEST_MAX_ROWS",
+    "INGEST_USER_AGENT",
+    "STORAGE_DIR",
+    "DEFAULT_LIMIT",
+    "MAX_LIMIT",
+    "PREVIEW_ROWS"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    }
+  }
+}

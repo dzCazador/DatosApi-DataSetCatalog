@@ -216,7 +216,7 @@ Cada fase es **autónoma**, está pensada para que un agente la ejecute de princ
 | Fase | Entregable | Estado |
 |:---:|---|:---:|
 | **00** | Kickoff: decisiones, repo y Git | ✅ 2026-10-01 |
-| **01** | Monorepo + infraestructura Docker (MongoDB) | ⬜ |
+| **01** | Monorepo + infraestructura Docker (MongoDB) | ✅ 2026-10-01 |
 | **02** | Backend base: NestJS, config, Swagger, salud | ⬜ |
 | **03** | Esquemas Mongoose y repositorios | ⬜ |
 | **04** | Ingesta manual + API externa | ⬜ |
