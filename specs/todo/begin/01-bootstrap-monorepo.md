@@ -117,14 +117,18 @@ networks:
 
 ## 6. Commit y push
 
+La fase se desarrolló en `fase/01-bootstrap-monorepo` y luego se mergeó a `main`
+(fast-forward). **Decisión del owner (2026-10-01): de ahora en adelante todo se commitea
+directo en `main`**, sin ramas por fase ni Pull Requests (ver `AGENTS.md` §4). La rama
+`fase/01-bootstrap-monorepo` fue eliminada local y remoto.
+
 ```bash
-git checkout -b fase/01-bootstrap-monorepo
+git checkout main
+git pull --ff-only
 git add -A
 git commit -m "chore: bootstrap pnpm and turbo monorepo with mongo"
-git push -u origin fase/01-bootstrap-monorepo
+git push origin main
 ```
-
-Abrir PR hacia `main`.
 
 ## 7. Estado y decisiones
 

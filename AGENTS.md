@@ -15,7 +15,7 @@
 4. **Implementá todos los checkpoints**. No dejes puntos `[ ]` sin marcar sin justificar.
 5. **Verificá** con los comandos de la fase y completá el *Definition of Done*.
 6. **Actualizá** el estado de la fase (marcar `[x]`, agregar fecha) y el roadmap del README raíz.
-7. **Commit** en una rama dedicada (ver §4). Push sólo si el usuario lo autoriza.
+7. **Commit** directo en `main` (ver §4). Push sólo si el usuario lo autoriza.
 
 ---
 
@@ -77,7 +77,13 @@ Detalle normativo en [`specs/conventions.md`](specs/conventions.md),
 
 - **Remoto:** `https://github.com/dzCazador/DatosApi-DataSetCatalog.git`. Rama por defecto:
   `main`. El repo se inicializa en la **fase 00**.
-- **Una rama por fase**, desde `main`: `fase/NN-<slug>` (p. ej. `fase/01-bootstrap-monorepo`).
+- **Se trabaja únicamente sobre `main`.** Decisión del owner (2026-10-01): **no** se crean
+  ramas `fase/NN-*` ni Pull Requests; cada fase se commitea directo en `main` y se pushea al
+  cerrar. La rama `fase/01-bootstrap-monorepo` fue mergeada y eliminada como consecuencia de
+  este cambio.
+  - Antes de arrancar cada fase: `git checkout main && git pull --ff-only`.
+  - Commits por fase, sin mixing: `feat: phase NN — <short summary>`.
+  - Nunca force-push; nunca push a otra rama.
 - **Conventional Commits**, y **el mensaje siempre en inglés**:
 
 ```text
@@ -102,13 +108,13 @@ perf:    performance
 - **Push siempre** al cerrar la fase:
 
 ```bash
-git checkout -b fase/NN-<slug>
+git checkout main
+git pull --ff-only
 git add -A
 git commit -m "feat: phase NN — <short summary>"
-git push -u origin fase/NN-<slug>
+git push origin main
 ```
 
-- Abrir **Pull Request** hacia `main` describiendo qué y por qué.
 - **Nunca** commitear secretos, `.env`, binarios descargados ni PDFs (`storage/` está
   gitignored). Si el push falla por credenciales, dejar el commit local y documentar el
   bloqueo (nunca force-push).
@@ -120,7 +126,7 @@ git push -u origin fase/NN-<slug>
 - [ ] Todos los checkpoints marcados o justificados.
 - [ ] `pnpm lint`, `pnpm typecheck`, `pnpm build` y `pnpm test` en verde (si existen).
 - [ ] Fase marcada como completada con fecha en su archivo y en el roadmap del README.
-- [ ] Commit creado en la rama de la fase.
+- [ ] Commit creado y pusheado en `main`.
 - [ ] Pendientes y decisiones anotados en la fase para la siguiente.
 
 ---

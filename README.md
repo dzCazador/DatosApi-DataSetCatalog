@@ -211,7 +211,8 @@ Detalle normativo: [`specs/frontend.md`](specs/frontend.md). Implementación: fa
 ## 🗺️ Roadmap por fases
 
 Cada fase es **autónoma**, está pensada para que un agente la ejecute de principio a fin,
-**pregunta y pide permisos al inicio**, y **commitea** al cerrar.
+**pregunta y pide permisos al inicio**, y **commitea directo en `main`** al cerrar (sin ramas
+por fase ni Pull Requests).
 
 | Fase | Entregable | Estado |
 |:---:|---|:---:|

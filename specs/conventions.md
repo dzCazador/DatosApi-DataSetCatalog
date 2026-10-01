@@ -219,8 +219,9 @@ Detalle y algoritmo en [`ingestion.md`](ingestion.md) §6.
 - **Los mensajes de commit van en inglés**, en una línea, imperativo y concisos
   (≤ 72 caracteres). Con scope cuando aporta: `feat(api): add pdf table extractor`.
 - Cierre de fase: `feat: phase NN — <short summary>`.
-- Un commit por fase, en la rama `fase/NN-<slug>`, contra el remoto
-  `https://github.com/dzCazador/DatosApi-DataSetCatalog.git`.
+- Un commit por fase, **directo en `main`** (sin ramas `fase/NN-*` ni Pull Requests), contra el
+  remoto `https://github.com/dzCazador/DatosApi-DataSetCatalog.git`. Decisión del owner
+  2026-10-01.
 - Nunca se commitean: `.env`, `storage/`, PDFs descargados, `coverage/`, `node_modules/`.
 - El `.gitignore` incluye `storage/`, `.env`, `*.local`, `coverage/`, `.turbo/`, `dist/`.
 
