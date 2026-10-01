@@ -228,7 +228,7 @@ por fase ni Pull Requests).
 | **01** | Monorepo + infraestructura Docker (MongoDB) | ✅ 2026-10-01 |
 | **02** | Backend base: NestJS, config, Swagger, salud | ✅ 2026-10-01 |
 | **03** | Esquemas Mongoose y repositorios | ✅ 2026-10-01 |
-| **04** | Ingesta manual + API externa | ⬜ |
+| **04** | Ingesta manual + API externa | ✅ 2026-10-01 |
 | **05** | Ingesta PDF por coordenadas + caso AFIP | ⬜ |
 | **06** | Datasets versionados, publicación y catálogo | ⬜ |
 | **07** | Endpoints dinámicos (filtros, orden, paginación) | ⬜ |

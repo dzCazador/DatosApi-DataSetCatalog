@@ -10,6 +10,7 @@ import { configuration } from './config/configuration';
 import { resolveEnvFilePaths } from './config/env-file-path';
 import { envValidationSchema } from './config/env.validation';
 import { HealthModule } from './health/health.module';
+import { SourcesModule } from './sources/sources.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { HealthModule } from './health/health.module';
     DatasetsPersistenceModule,
     EndpointsPersistenceModule,
     HealthModule,
+    SourcesModule,
   ],
 })
 export class AppModule {}

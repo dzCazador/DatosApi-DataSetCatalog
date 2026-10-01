@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { useIngestSizedBodyParser } from './common/body-parser';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { createSwaggerDocument, SWAGGER_PATH } from './common/swagger';
 import { isWildcardOrigin } from './config/configuration';
@@ -22,6 +23,7 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix(prefix, { exclude: [HEALTH_ROUTE] });
   app.enableCors({ origin: isWildcardOrigin(corsOrigins) ? '*' : corsOrigins });
+  useIngestSizedBodyParser(app, config.getOrThrow('INGEST_MAX_BYTES'));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

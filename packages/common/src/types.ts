@@ -8,8 +8,16 @@ import type {
   SourceType,
 } from './enums';
 
-/** Valores admitidos en una celda: la clave de columna va en snake_case. */
-export type Row = Record<string, string | number | boolean | null>;
+/**
+ * Valores admitidos en una celda: la clave de columna va en snake_case.
+ *
+ * `Date` está incluido aunque `data-model.md` §3 muestre la unión sin él: el spec es
+ * internamente inconsistente, porque `ColumnType` admite `'date'`, `data-model.md` §1 exige
+ * "todas las fechas como `Date`" e `ingestion.md` §6.2 mapea `"2026-07-01"` → `Date`. Sin
+ * `Date` en la unión, toda celda de fecha tendría que guardarse como texto ISO, y una columna
+ * declarada `date` no podría cumplir su propio tipo.
+ */
+export type Row = Record<string, string | number | boolean | Date | null>;
 
 export interface ColumnSchema {
   key: string;
