@@ -1,9 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true
+    // `rootDir`/`outDir` viven en tsconfig.build.json: con `paths` de la raíz, el typecheck
+    // (--noEmit) arrastra el src de @datosapi/common al programa y un `rootDir` acotado
+    // al propio src lo marca como error TS6059.
+    "declaration": true,
+    "declarationMap": true,
+    // Las clases de esquema se llenan por Mongoose, no por constructor.
+    "strictPropertyInitialization": false,
+    "types": ["node", "jest"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

@@ -15,6 +15,7 @@
     "test:e2e": "jest --config test/jest-e2e.json --runInBand"
   },
   "dependencies": {
+    "@datosapi/common": "workspace:*",
     "@datosapi/database": "workspace:*",
     "@nestjs/common": "^11.2.7",
     "@nestjs/config": "^4.0.4",
@@ -58,6 +59,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "moduleNameMapper": {
+      "^@datosapi/common$": "<rootDir>/../../../packages/common/src/index.ts",
       "^@datosapi/database$": "<rootDir>/../../../packages/database/src/index.ts"
     },
     "collectCoverageFrom": [

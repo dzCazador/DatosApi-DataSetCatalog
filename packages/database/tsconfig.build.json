@@ -1,7 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    // Sin `paths`: el build resuelve @datosapi/common por node_modules (su dist), no por
+    // el src del vecino, para no emitir fuera de la raíz común.
     "paths": {}
   },
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }

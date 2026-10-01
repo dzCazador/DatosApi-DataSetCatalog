@@ -1,0 +1,18 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  // Los tests de repositorio abren conexión real: 5 s no alcanzan.
+  "testTimeout": 30000,
+  "testRegex": ".*\\.(spec|e2e-spec)\\.ts$",
+  "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@datosapi/common$": "<rootDir>/../common/src/index.ts",
+    "^@datosapi/database$": "<rootDir>/src/index.ts"
+  },
+  "collectCoverageFrom": ["src/**/*.ts"],
+  "coverageDirectory": "../coverage"
+}

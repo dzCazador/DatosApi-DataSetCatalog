@@ -7,6 +7,7 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
+    "^@datosapi/common$": "<rootDir>/../../packages/common/src/index.ts",
     "^@datosapi/database$": "<rootDir>/../../packages/database/src/index.ts"
   }
 }

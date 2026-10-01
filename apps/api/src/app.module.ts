@@ -1,4 +1,9 @@
-import { DatabaseModule } from '@datosapi/database';
+import {
+  DatabaseModule,
+  DatasetsPersistenceModule,
+  EndpointsPersistenceModule,
+  SourcesPersistenceModule,
+} from '@datosapi/database';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { configuration } from './config/configuration';
@@ -20,6 +25,9 @@ import { HealthModule } from './health/health.module';
       },
     }),
     DatabaseModule.forRoot(),
+    SourcesPersistenceModule,
+    DatasetsPersistenceModule,
+    EndpointsPersistenceModule,
     HealthModule,
   ],
 })

@@ -1,0 +1,22 @@
+{
+  "name": "@datosapi/common",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Enums, tipos y contratos compartidos de DatosApi. Sin dependencias de runtime.",
+  "license": "UNLICENSED",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.5.4"
+  }
+}
