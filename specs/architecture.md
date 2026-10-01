@@ -50,6 +50,7 @@ DatosApi/
 │  │  │  ├─ main.ts           # bootstrap + ValidationPipe global
 │  │  │  ├─ app.module.ts
 │  │  │  ├─ config/           # configuración por entorno + Joi
+│  │  │  ├─ common/           # filtro de errores, códigos, DomainException, Swagger
 │  │  │  ├─ health/           # health check
 │  │  │  ├─ sources/          # módulo sources
 │  │  │  ├─ ingestion/        # motor de ingesta (strategies)

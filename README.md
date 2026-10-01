@@ -165,6 +165,14 @@ pnpm infra:up      # MongoDB
 pnpm dev           # api en :3001
 ```
 
+Comprobaciones del backend base:
+
+| Ruta | Qué devuelve |
+|---|---|
+| `http://localhost:3001/health` | `{ status, uptime, database: { status, ping } }`; `503` si MongoDB no responde |
+| `http://localhost:3001/docs` | Swagger UI |
+| `http://localhost:3001/api/v1/...` | Rutas de negocio bajo `API_PREFIX` |
+
 > El arranque real se construye por fases. Empezá por
 > [`specs/todo/begin/00-kickoff.md`](specs/todo/begin/00-kickoff.md).
 
@@ -218,7 +226,7 @@ por fase ni Pull Requests).
 |:---:|---|:---:|
 | **00** | Kickoff: decisiones, repo y Git | ✅ 2026-10-01 |
 | **01** | Monorepo + infraestructura Docker (MongoDB) | ✅ 2026-10-01 |
-| **02** | Backend base: NestJS, config, Swagger, salud | ⬜ |
+| **02** | Backend base: NestJS, config, Swagger, salud | ✅ 2026-10-01 |
 | **03** | Esquemas Mongoose y repositorios | ⬜ |
 | **04** | Ingesta manual + API externa | ⬜ |
 | **05** | Ingesta PDF por coordenadas + caso AFIP | ⬜ |
