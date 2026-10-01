@@ -45,25 +45,30 @@ Source  ──1:N──▶  Dataset  ──1:N──▶  EndpointDefinition
 ```text
 DatosApi/
 ├─ apps/
-│  └─ api/                    # NestJS 11 — única app del MVP
-│     ├─ src/
-│     │  ├─ main.ts           # bootstrap + ValidationPipe global
-│     │  ├─ app.module.ts
-│     │  ├─ config/           # configuración por entorno + Joi
-│     │  ├─ health/           # health check
-│     │  ├─ sources/          # módulo sources
-│     │  ├─ ingestion/        # motor de ingesta (strategies)
-│     │  │  ├─ strategies/
-│     │  │  │  ├─ manual.strategy.ts
-│     │  │  │  ├─ api.strategy.ts
-│     │  │  │  ├─ url.strategy.ts
-│     │  │  │  └─ pdf.strategy.ts
-│     │  │  ├─ ingestor.factory.ts
-│     │  │  └─ parser/        # normalización compartida
-│     │  ├─ datasets/         # módulo datasets + repos
-│     │  ├─ endpoints/        # módulo endpoints (CRUD)
-│     │  └─ dynamic/          # controller genérico /e/:slug
-│     └─ test/
+│  ├─ api/                    # NestJS 11 — ingesta, catálogo y endpoint dinámico
+│  │  ├─ src/
+│  │  │  ├─ main.ts           # bootstrap + ValidationPipe global
+│  │  │  ├─ app.module.ts
+│  │  │  ├─ config/           # configuración por entorno + Joi
+│  │  │  ├─ health/           # health check
+│  │  │  ├─ sources/          # módulo sources
+│  │  │  ├─ ingestion/        # motor de ingesta (strategies)
+│  │  │  │  ├─ strategies/
+│  │  │  │  │  ├─ manual.strategy.ts
+│  │  │  │  │  ├─ api.strategy.ts
+│  │  │  │  │  ├─ url.strategy.ts
+│  │  │  │  │  └─ pdf.strategy.ts
+│  │  │  │  ├─ ingestor.factory.ts
+│  │  │  │  └─ parser/        # normalización compartida
+│  │  │  ├─ datasets/         # módulo datasets + repos
+│  │  │  ├─ endpoints/        # módulo endpoints (CRUD)
+│  │  │  └─ dynamic/          # controller genérico /e/:slug
+│  │  └─ test/
+│  └─ web/                    # Next.js 15 — panel de administración (fase 09)
+│     └─ src/
+│        ├─ app/              # rutas: /, /sources, /datasets, /endpoints, /e/[slug]
+│        ├─ components/       # ui/ (propios) + layout/ (shell inspirado en Horizon UI)
+│        └─ lib/              # clientes de API, esquemas zod, formateo es-AR
 ├─ packages/
 │  ├─ common/                 # enums, tipos, DTOs, utils (sin deps pesadas)
 │  └─ database/               # conexión Mongoose + esquemas + repos base
@@ -75,9 +80,9 @@ DatosApi/
 └─ package.json
 ```
 
-> **Por qué `packages/`?** `common` y `database` son compartidos y no deben depender de la
-> capa HTTP. El MVP tiene una sola app, pero separar desde el inicio evita reescritura
-> cuando se agregue un worker o un front.
+> **Por qué `packages/`?** `common` y `database` son compartidos y no deben depender de
+> la capa HTTP. `apps/api` y `apps/web` arrancan separadas desde el inicio: agregarlas
+> después exigiría mover código ya publicado.
 
 ---
 
@@ -251,6 +256,8 @@ Cada límite tiene un disparador concreto, no una excusa.
 | RF-08 | Rechazar queries fuera del allowlist con `400` |
 | RF-09 | Seguir la última versión publicada (`followLatest`) |
 | RF-10 | Preview del dataset (primeras N filas) para revisión manual |
+| RF-11 | Panel web para operar fuentes, datasets y endpoints sin llamar a la API a mano |
+| RF-12 | Playground en el panel para probar `GET /e/:slug` con los filtros del allowlist |
 
 ## 12. Requisitos no funcionales
 
@@ -262,12 +269,18 @@ Cada límite tiene un disparador concreto, no una excusa.
 | RNF-04 | Errores uniformes con `code` + `message` + `details` |
 | RNF-05 | Todo el stack corre en Docker Compose con `pnpm dev` |
 | RNF-06 | Cada fase del plan es ejecutable de inicio a fin por un agente |
+| RNF-07 | El panel es código propio: sin código ni paquetes del template de referencia |
 
-## 13. Fuera de alcance (MVP)
+## 13. Fuera de alcance
 
 - Autenticación y multi-tenancy.
 - Webhooks y subscriptions.
 - Scraping de HTML con JavaScript (puppeteer/playwright).
 - Transformaciones arbitrarias entre datasets (join, pivot).
 - Exportaciones (CSV/Excel) desde el endpoint.
-- Frontend de administración.
+- Edición de `rows` o `schema` desde el panel: los datos se cambian reingeriendo.
+
+> **Frontend.** El panel de administración existe y es la **fase 09**, después de que el
+> backend esté cerrado y verificado. El backend es el producto; el panel es su operación.
+> El panel es un **consumidor de la API pública**: no accede a MongoDB ni duplica reglas de
+> negocio. Ver [`frontend.md`](frontend.md).

@@ -102,6 +102,7 @@ definidos por configuración**, no por código.
 | App | Rol | Tecnología | Puerto |
 |---|---|---|---|
 | `apps/api` | Ingesta, normalización, catálogo y endpoint dinámico | NestJS + Mongoose + Swagger | `3001` |
+| `apps/web` | Panel de administración (fase 09) | Next.js + React + Tailwind CSS | `3000` |
 
 | Paquete | Rol | Tecnología |
 |---|---|---|
@@ -122,7 +123,8 @@ definidos por configuración**, no por código.
 ```text
 DatosApi/
 ├── apps/
-│   └── api/              # Backend NestJS (ingesta, datasets, endpoint dinámico)
+│   ├── api/              # Backend NestJS (ingesta, datasets, endpoint dinámico)
+│   └── web/              # Panel de administración (Next.js, fase 09)
 ├── packages/
 │   ├── common/           # Tipos, enums y contratos compartidos
 │   └── database/         # Conexión Mongoose, esquemas y repositorios
@@ -133,6 +135,7 @@ DatosApi/
 │   ├── ingestion.md
 │   ├── api-contract.md
 │   ├── conventions.md
+│   ├── frontend.md
 │   └── todo/begin/       # Puesta en marcha por fases (para agentes)
 ├── storage/              # Descargas en runtime (gitignored)
 ├── docker-compose.yml
@@ -180,6 +183,31 @@ El PDF de referencia:
 
 ---
 
+## 🖥️ Frontend
+
+`apps/web` es el **panel de administración**: permite crear fuentes, disparar ingestas,
+revisar el `schema` y los `warnings`, publicar datasets, definir endpoints y probar
+`GET /e/:slug` sin `curl`. Es un **consumidor de la API pública**: no accede a MongoDB ni
+duplica reglas de negocio.
+
+La UI está **inspirada en**
+[Horizon UI Tailwind CSS NextJS](https://github.com/horizon-ui/horizon-tailwind-react-nextjs)
+(sidebar fijo + navbar superior, escala de espaciado y tokens, modo claro/oscuro, tablas y
+badges de estado). **No se clona ni se vendoriza el template**: los componentes son
+propios, lo que además evita la licencia comercial de Horizon UI / Simmmple.
+
+Detalle normativo: [`specs/frontend.md`](specs/frontend.md). Implementación: fase 09.
+
+| Pantalla | Qué hace |
+|---|---|
+| Dashboard | Estado de la API, fuentes por estado, ingesta reciente, endpoints publicados |
+| Fuentes | Alta por tipo, disparo de ingesta, diagnóstico de `lastError`, versiones |
+| Datasets | `schema`, preview de filas, `warnings`, publicar/archivar, trazabilidad |
+| Endpoints | Editor de la definición con filtros y orden atados al `schema`, validar |
+| Playground | Consulta `GET /e/:slug` con el `curl` equivalente copiable |
+
+---
+
 ## 🗺️ Roadmap por fases
 
 Cada fase es **autónoma**, está pensada para que un agente la ejecute de principio a fin,
@@ -187,7 +215,7 @@ Cada fase es **autónoma**, está pensada para que un agente la ejecute de princ
 
 | Fase | Entregable | Estado |
 |:---:|---|:---:|
-| **00** | Kickoff: decisiones, repo y Git | ⬜ |
+| **00** | Kickoff: decisiones, repo y Git | ✅ 2026-10-01 |
 | **01** | Monorepo + infraestructura Docker (MongoDB) | ⬜ |
 | **02** | Backend base: NestJS, config, Swagger, salud | ⬜ |
 | **03** | Esquemas Mongoose y repositorios | ⬜ |
@@ -196,6 +224,7 @@ Cada fase es **autónoma**, está pensada para que un agente la ejecute de princ
 | **06** | Datasets versionados, publicación y catálogo | ⬜ |
 | **07** | Endpoints dinámicos (filtros, orden, paginación) | ⬜ |
 | **08** | Calidad, tests y verificación end-to-end | ⬜ |
+| **09** | Frontend: panel de administración (Next.js + Tailwind) | ⬜ |
 
 ---
 
@@ -212,7 +241,8 @@ contradice un spec, manda el spec.
 | [`ingestion.md`](specs/ingestion.md) | Strategies, parsing, normalización y errores |
 | [`api-contract.md`](specs/api-contract.md) | Contrato REST completo y códigos de error |
 | [`conventions.md`](specs/conventions.md) | Convenciones de código |
-| [`todo/begin/`](specs/todo/begin/) | Fases de puesta en marcha (00–08) |
+| [`frontend.md`](specs/frontend.md) | Panel de administración: stack, estructura y reglas de UI |
+| [`todo/begin/`](specs/todo/begin/) | Fases de puesta en marcha (00–09) |
 
 Guía operativa para agentes: [`AGENTS.md`](AGENTS.md).
 

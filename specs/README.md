@@ -30,6 +30,7 @@ entidades centrales son `Source`, `Dataset` y `EndpointDefinition`, y la base de
 | [`ingestion.md`](ingestion.md) | NORMATIVO | Estrategias de ingesta, parsing y normalización |
 | [`api-contract.md`](api-contract.md) | NORMATIVO | Contrato REST completo (CRUD + endpoint dinámico) |
 | [`conventions.md`](conventions.md) | NORMATIVO | Convenciones de código, nombres y errores |
+| [`frontend.md`](frontend.md) | NORMATIVO | Panel de administración: stack, estructura y reglas de UI |
 | [`todo/begin/`](todo/begin/) | GUÍA | Puesta en marcha por fases (ejecutables por agentes) |
 
 ---
@@ -42,7 +43,8 @@ architecture.md ── define el QUÉ y el CÓMO macro
    ├── data-model.md ──────── colecciones MongoDB e índices
    ├── ingestion.md ─────────Strategies de ingesta (pdf/api/url/manual)
    ├── api-contract.md ────── superficie HTTP pública
-   └── conventions.md ─────── reglas de código transversales
+   ├── conventions.md ─────── reglas de código transversales
+   └── frontend.md ────────── panel de administración (consume la API)
 ```
 
 `todo/begin/` traduce todo lo anterior a pasos ejecutables de puesta en marcha. Cada fase es
@@ -64,3 +66,5 @@ autónoma, pregunta y pide permisos al inicio, y cierra con verificación + comm
 5. **Agregar un endpoint no requiere deploy.** Es una operación de datos, no de código.
 6. **La extracción es honesta.** Si el parser no está seguro, lo dice en `warnings` en vez de
    inventar valores.
+7. **El panel es un cliente más.** La UI consume la API pública y no alcanza la base de
+   datos; ninguna regla de negocio vive en el frontend.

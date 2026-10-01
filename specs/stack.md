@@ -18,10 +18,12 @@
 | Extracción PDF | `pdfjs-dist` | 4.x |
 | CSV | `csv-parse` | 5.x |
 | HTTP saliente | `fetch` nativo (Node 22) / `undici` | — |
-| Validación env | `joi` | 18.x |
+| Validación env (API) | `joi` | 18.x |
 | Documentación | `@nestjs/swagger` | 11.x |
+| Frontend | Next.js + React + Tailwind CSS | 15.x / 19.x / 3.x |
+| Validación env (web) | `zod` | 4.x |
 | Paquetes | pnpm (workspaces) + Turborepo | 9.x / 2.x |
-| Testing | Jest + Supertest | 29.x / 7.x |
+| Testing | Jest + Supertest (api) · Vitest (web) | 29.x / 7.x |
 | Calidad | ESLint + Prettier | 9.x / 3.x |
 | Infra | Docker + Docker Compose | 27+ / v2 |
 
@@ -99,6 +101,34 @@ Mongoose +Aggregation Pipeline da control directo sobre documentos flexibles.
 | Alias | `@datosapi/common`, `@datosapi/database` vía `paths` + `tsconfig-paths` |
 | Versionado | Node 22, pnpm 9 (`packageManager` en el `package.json` raíz) |
 
+`apps/web` no importa `packages/database`: consume la API por HTTP. Sólo comparte tipos
+puros de `packages/common` (`ColumnSchema`, `FilterOperator`, `SourceType`).
+
+---
+
+## 4.1 Frontend — Next.js + Tailwind
+
+Detalle completo en [`frontend.md`](frontend.md). Resumen:
+
+| Pieza | Elección | Versión objetivo |
+|---|---|---|
+| Framework | Next.js (App Router) | 15.x |
+| UI runtime | React | 19.x |
+| Estilos | Tailwind CSS | 3.x |
+| Iconos | `lucide-react` | — |
+| Validación | `zod` | 4.x |
+| Cliente HTTP | `fetch` nativo (Server Components + Server Actions) | — |
+| Tests | Vitest + Testing Library | — |
+
+| Decisión | Alternativas descartadas | Motivo |
+|---|---|---|
+| **Inspirado en** [Horizon UI Tailwind CSS NextJS](https://github.com/horizon-ui/horizon-tailwind-react-nextjs) | Clonar el template, shadcn/ui completo, MUI, Chakra, Ant Design | Se adopta la dirección visual (sidebar + navbar, tokens, modo claro/oscuro, tablas) y se escriben los componentes propios. Evita la licencia comercial de Simmmple y no ata el panel a un template de terceros. |
+| Next.js App Router | Vite + React Router, Remix, SvelteKit | El panel es de lectura; el render en servidor evita el waterfall de requests al cargar `schema` + preview. Un solo proceso en dev. |
+| Sin librería de componentes | MUI, Chakra, Ant Design, shadcn | Cada dependencia de UI es una dependencia que actualizar. Los componentes propios son `DataTable`, `Badge`, `Card`, `Modal`, `Input`: una tarde de trabajo contra una dependencia grande. |
+| `zod` para formularios | `react-hook-form`, validación manual | Un solo esquema por formulario, validado en cliente y en el Server Action, sin librerías extra. |
+| `fetch` nativo | Axios, React Query, SWR | Consistente con el backend ([`stack.md`](stack.md) §2.3). El caché de Next cubre la lectura; no hace falta una capa de caché de cliente. |
+| Puerto `3000` | `3001` (colisión con la API) | Estándar de Next.js. La API queda en `3001`. |
+
 ---
 
 ## 5. Calidad
@@ -140,7 +170,15 @@ STORAGE_DIR=./storage
 DEFAULT_LIMIT=50
 MAX_LIMIT=500
 PREVIEW_ROWS=20
+
+# ── Frontend (fase 09, sólo apps/web) ───────────
+# Va en apps/web/.env.local, no en el .env de la API.
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+WEB_PORT=3000
 ```
+
+> `NEXT_PUBLIC_*` queda embebido en el bundle del navegador: nunca un secreto con ese
+> prefijo. `CORS_ORIGINS` debe incluir el origen del panel (`http://localhost:3000` en dev).
 
 ---
 
@@ -156,6 +194,7 @@ PREVIEW_ROWS=20
 | Query en memoria | Aggregation Pipeline | Los datasets del MVP son chicos. El motor es intercambiable tras una interfaz. |
 | Ingesta síncrona | BullMQ + Redis | Evita Redis en el MVP. Si hace falta async, se agrega después sin cambiar el contrato. |
 | Sin auth | JWT + RBAC | El dominio es el foco. La estructura de módulos ya permite agregar guards. |
+| Frontend inspirado en Horizon UI | Clonar Horizon UI, MUI, Chakra | Se toma la dirección visual y se escribe el código. La licencia del template es comercial; el panel queda sin dependencia de terceros. Ver [`frontend.md`](frontend.md) §2. |
 
 ---
 

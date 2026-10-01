@@ -29,9 +29,9 @@
 
 ## 1. Inicializar el repositorio
 
-- [ ] `git init` en la raíz y fijar la rama: `git branch -M main`.
-- [ ] `git remote add origin https://github.com/dzCazador/DatosApi-DataSetCatalog.git`.
-- [ ] Verificar: `git remote -v`.
+- [x] `git init` en la raíz y fijar la rama: `git branch -M main`.
+- [x] `git remote add origin https://github.com/dzCazador/DatosApi-DataSetCatalog.git`.
+- [x] Verificar: `git remote -v`.
 
 ## 2. `.gitignore`
 
@@ -56,12 +56,12 @@ tmp/
 !specs/**/*.pdf
 ```
 
-- [ ] Verificar que `storage/` y `.env` quedan ignorados: `git check-ignore -v .env storage/x.pdf`.
+- [x] Verificar que `storage/` y `.env` quedan ignorados: `git check-ignore -v .env storage/x.pdf`.
 
 ## 3. Primer commit (documentación)
 
-- [ ] `git add -A` y revisar con `git status` que **no** entra nada que no deba.
-- [ ] Commit:
+- [x] `git add -A` y revisar con `git status` que **no** entra nada que no deba.
+- [x] Commit:
 
 ```bash
 git commit -m "docs: add DatosApi specs and roadmap"
@@ -70,11 +70,16 @@ git push -u origin main
 
 ## 4. Criterios de aceptación
 
-- [ ] `git remote -v` apunta al remoto correcto.
-- [ ] `git log --oneline` muestra el commit de docs.
-- [ ] El push fue exitoso, **o** el bloqueo quedó documentado en §5.
+- [x] `git remote -v` apunta al remoto correcto.
+- [x] `git log --oneline` muestra el commit de docs.
+- [x] El push fue exitoso, **o** el bloqueo quedó documentado en §5.
 
 ## 5. Estado y decisiones
 
-- Fecha de ejecución: **<AGREGAR>**
-- `<AGREGAR: resultado del push o bloqueo>`
+- Fecha de ejecución: **2026-10-01**
+- Remoto: `https://github.com/dzCazador/DatosApi-DataSetCatalog.git`, rama por defecto `main`.
+- `.env` y `storage/*.pdf` confirmados como ignorados.
+- Cierre con un segundo commit de docs que incorpora el spec de frontend
+  ([`specs/frontend.md`](../../frontend.md)), la fase 09 y las actualizaciones de
+  `README.md`, `AGENTS.md` y specs.
+- Push a `origin/main` con las credenciales ya configuradas en el entorno.

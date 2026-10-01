@@ -62,9 +62,14 @@ Al inicio de **cada** fase, antes de escribir código:
 - **Versionado inmutable**: una ingesta nueva **nunca** muta un `Dataset` existente; crea
   `version + 1`.
 - Secretos sólo en variables de entorno validadas al arranque; jamás en el repo.
+- El **frontend (`apps/web`) es un cliente de la API**, no una segunda capa de negocio: no
+  accede a MongoDB y las columnas y filtros se generan desde `schema` y `EndpointDefinition`,
+  nunca hardcodeados.
+- La UI está **inspirada en** Horizon UI Tailwind CSS NextJS, pero el código es propio: sin
+  paquetes `@horizon-ui/*` ni código copiado del template.
 
-Detalle normativo en [`specs/conventions.md`](specs/conventions.md) y
-[`specs/architecture.md`](specs/architecture.md).
+Detalle normativo en [`specs/conventions.md`](specs/conventions.md),
+[`specs/architecture.md`](specs/architecture.md) y [`specs/frontend.md`](specs/frontend.md).
 
 ---
 
