@@ -231,7 +231,7 @@ por fase ni Pull Requests).
 | **04** | Ingesta manual + API externa | ✅ 2026-10-01 |
 | **05** | Ingesta PDF por coordenadas + caso AFIP | ✅ 2026-10-02 |
 | **06** | Datasets versionados, publicación y catálogo | ✅ 2026-10-02 |
-| **07** | Endpoints dinámicos (filtros, orden, paginación) | ⬜ |
+| **07** | Endpoints dinámicos (filtros, orden, paginación) | ✅ 2026-10-02 |
 | **08** | Calidad, tests y verificación end-to-end | ⬜ |
 | **09** | Frontend: panel de administración (Next.js + Tailwind) | ⬜ |
 

@@ -239,8 +239,16 @@ Alias de `archive`. `204`.
 - `201` con la definición.
 - `400 SLUG_INVALID` / `409 SLUG_TAKEN`.
 - `422 SCHEMA_MISMATCH` si algún `field` de `filters`, `sort` o `fields` no existe en el
-  schema del dataset resuelto.
-- Si `followLatest: true`, `datasetId` es opcional y se usa el último `published`.
+  schema del dataset resuelto. `details.unknownFields` dice dónde está cada referencia
+  (`filters[1].field`).
+- Si `followLatest: true`, `datasetId` es opcional y se usa el último `published`. Si es
+  `false`, `datasetId` es obligatorio: omitirlo es `400 VALIDATION_ERROR`.
+- `404 DATASET_NOT_FOUND` si el `datasetId` no existe, y `422 SCHEMA_MISMATCH` si pertenece a
+  otra `sourceId` que la de la definición.
+- `defaultLimit` y `maxLimit` se omiten para usar `DEFAULT_LIMIT` y `MAX_LIMIT`. Un
+  `maxLimit` mayor que `MAX_LIMIT`, o un `defaultLimit` mayor que el `maxLimit`, es
+  `400 VALIDATION_ERROR` con `details.ceiling`: el `ValidationPipe` no puede aplicar el tope
+  porque sale de la configuración, así que lo valida el service.
 
 ### `GET /api/v1/endpoints`
 
@@ -266,10 +274,16 @@ Detalle de la definición **con** un campo `resolved` que informa qué dataset u
 }
 ```
 
+Cuando no resuelve —el `datasetId` declarado ya no existe, o la `sourceId` todavía no tiene
+ningún `published`— `resolved` es `null` y `resolvedReason` trae el motivo en texto. Nunca es
+`404`: la definición existe y el panel tiene que poder mostrarla. `status` puede ser
+`archived`; la definición se muestra igual porque el panel necesita ver contra qué apunta.
+
 ### `PATCH /api/v1/endpoints/:id`
 
-Actualización parcial. Revalida contra el schema si cambian `fields`, `filters` o `sort`.
-`200`.
+Actualización parcial. Revalida contra el schema si cambian `fields`, `filters`, `sort`,
+`datasetId` o `followLatest`. El `slug` no se puede cambiar: rompería las URLs ya publicadas,
+y mandarlo es `400 VALIDATION_ERROR`. `200`.
 
 ### `POST /api/v1/endpoints/:id/validate`
 
@@ -280,13 +294,18 @@ Revalida contra el schema actual y devuelve el detalle:
   "valid": false,
   "datasetId": "66f1…",
   "version": 1,
+  "status": "published",
   "unknownFields": [
     { "where": "filters[1].field", "field": "importe_desde", "reason": "not in dataset schema" }
-  ]
+  ],
+  "reason": null
 }
 ```
 
 `200` siempre (es un reporte, no un fallo). Útil tras cambiar el schema con una reingesta.
+`valid` es `false` también cuando el dataset resuelto no se puede consultar: `status` y
+`reason` dicen cuál de los dos casos es (`draft`, `archived`, sin dataset resuelto) y en ese
+caso `unknownFields` viene vacío.
 
 ### `DELETE /api/v1/endpoints/:id`
 
@@ -308,22 +327,27 @@ Revalida contra el schema actual y devuelve el detalle:
 | `limit` | entero ≥ 1 | default `defaultLimit`; ≤ `maxLimit`; si excede → `400 INVALID_PAGINATION` (no se clampa en silencio) |
 | `sort` | `campo:asc` o `campo:desc`, múltiple por `sort=a:asc&sort=b:desc` | campos deben estar en `sort[]` |
 | `<field>` | valor según el operador declarado en `filters[]` | campos fuera del allowlist → `400 FILTER_NOT_ALLOWED` |
-| `fields` | lista CSV de columnas | opcional:override de la proyección |
+| `fields` | lista CSV de columnas | override de la proyección; debe ser un **subconjunto** de `fields[]` |
+
+La proyección por defecto es la que declara la definición en `fields[]`; si no la declara, son
+todas las columnas del schema. `?fields=` la sobreescribe pero no la amplía: pedir una columna
+fuera de `fields[]` es `400 FILTER_NOT_ALLOWED`.
 
 **Semántica de operadores** (`filters[].op`):
 
 | `op` | Query | Ejemplo | Match |
 |---|---|---|---|
-| `eq` | escalar | `?tramo=A` | igualdad estricta |
-| `ne` | escalar | `?tramo=B` | desigualdad |
-| `gt`/`gte`/`lt`/`lte` | número o fecha | `?importe_desde=50000` | comparación; el valor se castea al tipo del schema |
+| `eq` | escalar | `?tramo=A` | igualdad estricta; una celda `null` nunca es igual a un valor |
+| `ne` | escalar | `?tramo=B` | desigualdad; una celda `null` sí es distinta |
+| `gt`/`gte`/`lt`/`lte` | número o fecha | `?importe_desde=50000` | comparación; el valor se castea al tipo del schema. Una celda `null` no satisface ninguna |
 | `in` | CSV | `?tramo=A,B,C` | pertenencia |
 | `contains` | texto | `?descripcion=abc` | substring, case-insensitive |
-| `starts_with` | texto | `?descripcion=Pro` | prefijo |
-| `between` | `a,b` | `?importe_desde=100,500` | intervalo inclusive |
+| `starts_with` | texto | `?descripcion=Pro` | prefijo, case-insensitive |
+| `between` | `a,b` | `?importe_desde=100,500` | intervalo inclusive. `a > b` no matchea nada; no se normaliza el rango |
 
 Si el filtro es `required: true` y no viene el param → `400` (`FILTER_NOT_ALLOWED` con
-`details.field`).
+`details.field`). Cualquier otro parámetro no reconocido —incluido un typo en el nombre de un
+filtro— también es `400 FILTER_NOT_ALLOWED` con `details.param`: nada se ignora en silencio.
 
 **Respuesta `200`:**
 
@@ -354,15 +378,30 @@ GET /api/v1/e/escala-retencion-4ta-categoria?importe_desde=50000&limit=10&sort=i
 | Situación | HTTP | `code` |
 |---|---|---|
 | Slug inexistente o `enabled: false` | 404 | `SLUG_NOT_FOUND` |
-| Dataset resuelto inexistente / archivado | 422 | `SCHEMA_MISMATCH` |
+| Dataset resuelto inexistente / archivado / en `draft` | 422 | `SCHEMA_MISMATCH` |
+| La definición referencia una columna que el dataset no tiene | 422 | `SCHEMA_MISMATCH` |
 | Campo de filtro no permitido | 400 | `FILTER_NOT_ALLOWED` |
+| Parámetro de query no reconocido | 400 | `FILTER_NOT_ALLOWED` |
+| `fields` fuera de la proyección permitida | 400 | `FILTER_NOT_ALLOWED` |
 | `limit > maxLimit` o `< 1` | 400 | `INVALID_PAGINATION` |
 | `sort` por campo no permitido | 400 | `SORT_NOT_ALLOWED` |
 | Filtro `required` ausente | 400 | `FILTER_NOT_ALLOWED` |
 | Valor no casteable al tipo del schema | 400 | `VALIDATION_ERROR` |
 
-**Headers de cache:** `ETag` derivado de `datasetId + version + query`. Permite
-`If-None-Match` → `304` sin recalcular.
+Un `draft` da el mismo `422` que un `archived` —con `details.status` para distinguirlos— porque
+el slug existe y está habilitado: lo que falta es la publicación, que es un paso deliberado
+del flujo, no una avería. Sólo se sirven datasets `published`.
+
+Lo mismo pasa si una reingesta le quitó al dataset una columna que la definición declara en
+`fields[]`, `filters[]` o `sort[]`: es `422 SCHEMA_MISMATCH` con
+`details.unknownFields`, no un filtro descartado. El allowlist y el schema son listas
+distintas —`filters[]` decide *qué se puede filtrar*, el schema decide *sobre qué datos*— y
+declarar una columna que no existe es un error de configuración de la definición, no del
+cliente. `POST /endpoints/:id/validate` es la vía para detectarlo y corregirlo.
+
+**Headers de cache:** `ETag` derivado de `datasetId + version + query` canónico (las claves
+ordenadas, así que `?a=1&b=2` y `?b=2&a=1` dan el mismo `ETag`). Permite `If-None-Match` →
+`304` sin body.
 
 ---
 

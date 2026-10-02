@@ -1,7 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { DATASETS_REPOSITORY, SOURCES_REPOSITORY, SourceStatus } from '@datosapi/common';
+import {
+  DATASETS_REPOSITORY,
+  ENDPOINTS_REPOSITORY,
+  SOURCES_REPOSITORY,
+  SourceStatus,
+} from '@datosapi/common';
 import type {
   DatasetListItem,
   IngestContext,
@@ -11,7 +16,11 @@ import type {
   PaginationQuery,
   SourceEntity,
 } from '@datosapi/common';
-import type { DatasetsRepository, SourcesRepository } from '@datosapi/database';
+import type {
+  DatasetsRepository,
+  EndpointsRepository,
+  SourcesRepository,
+} from '@datosapi/database';
 
 import {
   IngestAlreadyRunningError,
@@ -72,6 +81,7 @@ export class SourcesService {
   constructor(
     @Inject(SOURCES_REPOSITORY) private readonly sources: SourcesRepository,
     @Inject(DATASETS_REPOSITORY) private readonly datasets: DatasetsRepository,
+    @Inject(ENDPOINTS_REPOSITORY) private readonly endpoints: EndpointsRepository,
     private readonly ingestorFactory: IngestorFactory,
     private readonly config: ConfigService<IngestConfig, true>,
   ) {}
@@ -132,14 +142,21 @@ export class SourcesService {
   }
 
   /**
-   * Borrado lógico (api-contract.md §3): no se borran datasets, que pueden estar publicados.
+   * Borrado lógico (api-contract.md §3, data-model.md §5): no se borran datasets —pueden
+   * estar publicados— pero sus endpoints se deshabilitan antes de marcar la fuente.
    *
-   * TODO(fase 07): desactivar también los endpoints asociados con `enabled = false`, antes de
-   * marcar la fuente como dada de baja. Hoy no se puede porque no hay ningún endpoint
-   * publicado y `EndpointsRepository` todavía no expone esa operación.
+   * El orden importa: si la fuente quedara dada de baja y la deshabilitación fallara, el slug
+   * quedaría sirviendo datos de una fuente que la API ya da por baja. Al revés, una fuente
+   * viva con endpoints apagados es un estado defendible y reparable.
    */
   async remove(id: string): Promise<void> {
     const source = await this.findOne(id);
+
+    const disabled = await this.endpoints.disableBySourceId(source.id);
+
+    if (disabled > 0) {
+      this.logger.log(`baja ${source.id}: ${disabled} endpoints deshabilitados`);
+    }
 
     await this.sources.markFailed(
       source.id,
