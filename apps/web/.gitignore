@@ -1,0 +1,9 @@
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Entorno (también cubierto por el .gitignore raíz)
+.env.local
+.env.*.local

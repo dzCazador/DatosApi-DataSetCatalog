@@ -1,0 +1,19 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["NEXT_PUBLIC_API_URL", "WEB_PORT"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NEXT_PUBLIC_API_URL", "WEB_PORT"]
+    },
+    "test": {
+      "outputs": [],
+      "env": ["NEXT_PUBLIC_API_URL"]
+    }
+  }
+}

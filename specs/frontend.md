@@ -85,27 +85,42 @@ apps/web/
 │  ├─ app/
 │  │  ├─ layout.tsx                # shell: sidebar + navbar
 │  │  ├─ page.tsx                  # dashboard
+│  │  ├─ error.tsx                 # error boundary del panel (no de la API)
+│  │  ├─ not-found.tsx
 │  │  ├─ sources/
-│  │  │  ├─ page.tsx               # listado
+│  │  │  ├─ page.tsx               # listado + alta
 │  │  │  └─ [id]/page.tsx          # detalle + ingesta + datasets
 │  │  ├─ datasets/
 │  │  │  ├─ page.tsx
 │  │  │  └─ [id]/page.tsx          # schema + preview + publicar/archivar
 │  │  ├─ endpoints/
-│  │  │  ├─ page.tsx
-│  │  │  └─ [id]/page.tsx          # editor de definición
+│  │  │  ├─ page.tsx               # listado + alta
+│  │  │  └─ [id]/page.tsx          # editor de definición + validar
 │  │  ├─ e/[slug]/page.tsx         # playground del endpoint dinámico
-│  │  └─ docs/page.tsx             # redirección a /docs de la API
+│  │  └─ docs/page.tsx             # enlace a /docs de la API
 │  ├─ components/
 │  │  ├─ ui/                       # DataTable, Button, Badge, Card, Modal, Toast, Input…
-│  │  └─ layout/                   # Sidebar, Navbar, Breadcrumb
+│  │  ├─ layout/                   # Sidebar + Navbar + Breadcrumb
+│  │  ├─ data-columns.tsx          # columnas de tabla derivadas de ColumnSchema[]
+│  │  ├─ schema-columns.tsx        # tabla del schema
+│  │  ├─ api-error-banner.tsx      # error de API traducido por code
+│  │  ├─ sources/                  # formulario de alta, ingesta, borrado
+│  │  ├─ datasets/                 # publicar/archivar, warnings
+│  │  ├─ endpoints/                # editor, listas de campos/filtros/sort, validar, borrar
+│  │  └─ playground/               # formulario de filtros
 │  ├─ lib/
+│  │  ├─ actions/                  # Server Actions + traducción del resultado a la UI
 │  │  ├─ api/                      # clientes por recurso + tipos de respuesta
-│  │  ├─ schema/                   # zod: lectura de schema, filtros, paginación
-│  │  └─ format/                   # number/date/percent es-AR según ColumnSchema
-│  └─ styles/globals.css           # @tailwind + tokens
+│  │  ├─ schema/                   # zod: source config, editor de endpoint, slug, paginación
+│  │  ├─ format/                   # number/date/percent es-AR según ColumnSchema
+│  │  └─ cn.ts
+│  ├─ test/setup.ts
+│  └─ styles/globals.css           # @tailwind + tokens (claro y .dark)
+├─ .env.example                    # NEXT_PUBLIC_API_URL + WEB_PORT
 ├─ next.config.ts
 ├─ tailwind.config.ts
+├─ turbo.json                      # outputs .next/** y env del panel
+├─ vitest.config.ts
 └─ tsconfig.json
 ```
 
@@ -114,6 +129,10 @@ apps/web/
   única ruta parametrizada por dato.
 - El cliente de API vive en `src/lib/api/`. Ninguna página hace `fetch` directo: pasa por
   un cliente por recurso, que aplica `API_URL` y traduce errores.
+- `src/lib/actions/` contiene las **Server Actions**. Devuelven siempre el mismo shape
+  (`{ ok, message, detail?, fieldErrors? }`), nunca lanzan y nunca devuelven `Error`: una
+  acción que devuelve `redirect()` se declara como `Promise<ActionResult>` porque `redirect`
+  tira y nunca retorna.
 
 ---
 
@@ -128,6 +147,9 @@ apps/web/
   ([`api-contract.md`](api-contract.md) §1.2). Un `SLUG_NOT_FOUND` muestra un estado vacío
   con acción; un `FILTER_NOT_ALLOWED` muestra un aviso de que el filtro no está permitido;
   un `502`/`504` muestra que el problema es el origen, no el panel.
+  Hay **tres** motivos de fallo, no uno: `http` (la API respondió con un `code`), `transport`
+  (no respondió: apagada, `NEXT_PUBLIC_API_URL` mal, red) y `parse` (`2xx` con body
+  inesperado). Los tres se presentan con un motivo visible: nunca hay pantalla en blanco.
 - **Paginación:** el panel siempre manda `page` y `limit` explícitos, y usa `meta.total` /
   `meta.pages` de la respuesta. Nunca pagina en cliente sobre un conjunto ya recortado.
 - **Filtros del playground:** el formulario se construye a partir de `filters[]` y `sort[]`
@@ -161,10 +183,16 @@ apps/web/
 
 ## 7. Verificación
 
-- `pnpm lint` y `pnpm typecheck` en verde para `apps/web`.
+- `pnpm lint` y `pnpm typecheck` en verde para `apps/web`. El panel **hereda** la config de
+  ESLint de la raíz y le suma `next/core-web-vitals` + `next/typescript` vía `FlatCompat`
+  (`eslint-config-next` 15 sigue en formato eslintrc). Ninguna regla del backend se relaja.
 - Tests con Vitest + Testing Library sólo donde hay lógica propia: formateo según
   `ColumnSchema`, traducción de `code` a mensaje, y construcción del query del playground a
   partir de `filters[]`/`sort[]`.
 - **Sin** tests de renderizado completo: lo que se prueba es la lógica, no el snapshot.
+  `@testing-library/react` queda declarado como dependencia para cuando haya lógica de
+  componente que probar de verdad, no para快照.
 - Verificación manual contra la API real siguiendo el flujo de
-  [`api-contract.md`](api-contract.md) §8.
+  [`api-contract.md`](api-contract.md) §8. La del panel se hizo por HTTP (ver
+  [`todo/begin/09-frontend-admin.md`](todo/begin/09-frontend-admin.md) §8): la revisión
+  **visual** de los dos temas y de los modales sigue pendiente porque necesita navegador.

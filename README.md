@@ -161,8 +161,9 @@ git clone <url-del-repo>
 cd DatosApi
 pnpm install
 cp .env.example .env
+cp apps/web/.env.example apps/web/.env.local
 pnpm infra:up      # MongoDB
-pnpm dev           # api en :3001
+pnpm dev           # api en :3001 + panel en :3000
 ```
 
 Comprobaciones del backend base:
@@ -172,6 +173,11 @@ Comprobaciones del backend base:
 | `http://localhost:3001/health` | `{ status, uptime, database: { status, ping } }`; `503` si MongoDB no responde |
 | `http://localhost:3001/docs` | Swagger UI |
 | `http://localhost:3001/api/v1/...` | Rutas de negocio bajo `API_PREFIX` |
+| `http://localhost:3000` | Panel de administración |
+
+> `pnpm dev` levanta **los dos** en paralelo (Turbo). Para el panel hace falta
+> `apps/web/.env.local`; sin él, la app usa el default
+> `http://localhost:3001/api/v1`.
 
 > El arranque real se construye por fases. Empezá por
 > [`specs/todo/begin/00-kickoff.md`](specs/todo/begin/00-kickoff.md).
@@ -206,13 +212,43 @@ propios, lo que además evita la licencia comercial de Horizon UI / Simmmple.
 
 Detalle normativo: [`specs/frontend.md`](specs/frontend.md). Implementación: fase 09.
 
-| Pantalla | Qué hace |
+### Correrlo
+
+```bash
+pnpm install
+cp apps/web/.env.example apps/web/.env.local   # NEXT_PUBLIC_API_URL + WEB_PORT
+pnpm dev                                        # api :3001 + panel :3000
+```
+
+| Variable | Default | Para qué |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3001/api/v1` | Base de la API. **Nunca** se escribe a mano en el código. |
+| `WEB_PORT` | `3000` | Puerto del panel. Se resuelve en `next.config.ts`, no en los scripts. |
+
+Scripts propios: `pnpm --filter @datosapi/web dev | build | start | lint | typecheck | test`.
+`NEXT_PUBLIC_*` queda embebido en el bundle del navegador: nunca un secreto con ese prefijo.
+
+### Pantallas
+
+| Ruta | Qué hace |
 |---|---|
-| Dashboard | Estado de la API, fuentes por estado, ingesta reciente, endpoints publicados |
-| Fuentes | Alta por tipo, disparo de ingesta, diagnóstico de `lastError`, versiones |
-| Datasets | `schema`, preview de filas, `warnings`, publicar/archivar, trazabilidad |
-| Endpoints | Editor de la definición con filtros y orden atados al `schema`, validar |
-| Playground | Consulta `GET /e/:slug` con el `curl` equivalente copiable |
+| `/` | Estado de la API, fuentes por estado, ingesta reciente, endpoints |
+| `/sources` | Listado con filtros y alta; el formulario cambia según el `type` |
+| `/sources/[id]` | Config en solo lectura, disparo de ingesta, `lastError`, versiones, borrado |
+| `/datasets` | Listado con `version`, `status`, `rowCount`, `columnsCount`, `warnings` |
+| `/datasets/[id]` | Tabla de `schema`, preview renderizado desde el `schema`, publicar/archivar, `meta` |
+| `/endpoints` | Listado y alta con `fields`/`filters`/`sort` como desplegables del `schema` |
+| `/endpoints/[id]` | Editor, `POST /endpoints/:id/validate` y estado de resolución |
+| `/e/[slug]` | Playground: filtros desde `filters[]`, orden desde `sort[]`, `curl` copiable |
+| `/docs` | Enlace explícito a `GET /docs` de la API (sin iframe) |
+
+### Qué garantiza el panel
+
+- **Ninguna columna hardcodeada.** Toda columna renderizada sale de `ColumnSchema[]`.
+- **Ningún filtro hardcodeado.** El formulario del playground sale de `filters[]`/`sort[]`.
+- **Errores por `code`,** nunca por `message` (`api-contract.md` §1.2).
+- **`null` se muestra `—`,** nunca `0`. Los números salen en es-AR según su `decimalScale`
+  (`0.1525` con escala 4 → `15,25 %`).
 
 ---
 
@@ -233,7 +269,7 @@ por fase ni Pull Requests).
 | **06** | Datasets versionados, publicación y catálogo | ✅ 2026-10-02 |
 | **07** | Endpoints dinámicos (filtros, orden, paginación) | ✅ 2026-10-02 |
 | **08** | Calidad, tests y verificación end-to-end | ⬜ |
-| **09** | Frontend: panel de administración (Next.js + Tailwind) | ⬜ |
+| **09** | Frontend: panel de administración (Next.js + Tailwind) | ✅ 2026-10-02 |
 
 ---
 

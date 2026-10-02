@@ -1,0 +1,89 @@
+/* ── Tailwind ──────────────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tokens del panel. El modo oscuro es un solo interruptor: `darkMode: 'class'` en
+ * tailwind.config.ts más el bloque `.dark` de abajo. `dark:` de Tailwind y las variables
+ * CSS leen la misma clase, así que ningún componente lleva condicionales de color.
+ */
+@layer base {
+  :root {
+    --surface: 247 250 252;
+    --surface-raised: 255 255 255;
+    --surface-sunken: 241 245 249;
+
+    --content: 15 23 42;
+    --content-muted: 71 85 105;
+    --content-subtle: 148 163 184;
+
+    --line: 226 232 240;
+
+    --brand: 13 148 136;
+    --brand-soft: 204 251 241;
+    --brand-fg: 255 255 255;
+
+    --status-pending: 180 83 9;
+    --status-processing: 29 78 216;
+    --status-ready: 22 128 61;
+    --status-error: 185 28 28;
+    --status-neutral: 100 116 139;
+
+    --shadow: 15 23 42;
+  }
+
+  .dark {
+    --surface: 15 20 32;
+    --surface-raised: 23 30 45;
+    --surface-sunken: 11 15 25;
+
+    --content: 226 232 240;
+    --content-muted: 148 163 184;
+    --content-subtle: 100 116 139;
+
+    --line: 39 50 68;
+
+    --brand: 45 212 191;
+    --brand-soft: 19 78 74;
+    --brand-fg: 2 44 42;
+
+    --status-pending: 251 191 36;
+    --status-processing: 96 165 250;
+    --status-ready: 74 222 128;
+    --status-error: 248 113 113;
+    --status-neutral: 148 163 184;
+
+    --shadow: 0 0 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface text-content antialiased;
+  }
+
+  /* Foco visible en ambos modos: la navegación por teclado es requisito de accesibilidad. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-surface;
+  }
+}
+
+@layer components {
+  .dapi-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--line)) transparent;
+  }
+
+  .dapi-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dapi-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--line));
+    border-radius: 9999px;
+  }
+}
