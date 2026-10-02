@@ -163,6 +163,18 @@ export interface DatasetEntity {
 
 export type DatasetListItem = Omit<DatasetEntity, 'rows'>;
 
+/**
+ * `meta` de `GET /datasets/:id`. `previewTruncated` no es metadata de extracción sino de la
+ * respuesta: dice si `rows` viene recortado a `PREVIEW_ROWS`, para que el cliente no
+ * confunda un preview con el dataset completo (api-contract.md §4). Va siempre presente —
+  `false` cuando el body trae todas las filas — para que el frontend tenga un solo campo
+ * contra el cual ramificar.
+ */
+export type DatasetDetailMeta = ExtractionMeta & { previewTruncated: boolean };
+
+/** `GET /datasets/:id`: el dataset con filas, acotadas al preview salvo `?full=true`. */
+export type DatasetDetail = Omit<DatasetEntity, 'meta'> & { meta: DatasetDetailMeta };
+
 export interface EndpointDefinitionEntity {
   id: string;
   name: string;

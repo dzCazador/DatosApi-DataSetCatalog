@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { configuration } from './config/configuration';
 import { resolveEnvFilePaths } from './config/env-file-path';
 import { envValidationSchema } from './config/env.validation';
+import { DatasetsModule } from './datasets/datasets.module';
 import { HealthModule } from './health/health.module';
 import { SourcesModule } from './sources/sources.module';
 
@@ -31,6 +32,7 @@ import { SourcesModule } from './sources/sources.module';
     EndpointsPersistenceModule,
     HealthModule,
     SourcesModule,
+    DatasetsModule,
   ],
 })
 export class AppModule {}

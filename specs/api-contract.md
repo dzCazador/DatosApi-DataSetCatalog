@@ -35,6 +35,7 @@
 | `VERSION_CONFLICT` | 409 | Índice único `{sourceId, version}` |
 | `SOURCE_NOT_FOUND` | 404 | |
 | `DATASET_NOT_FOUND` | 404 | |
+| `DATASET_INVALID_STATE` | 409 | Transición de estado no permitida sobre un dataset (publicar uno ya `published`/`archived`, archivar un `draft`) |
 | `ENDPOINT_NOT_FOUND` | 404 | |
 | `SLUG_NOT_FOUND` | 404 | Slug inexistente **o deshabilitado** (no se distingue) |
 | `PAYLOAD_TOO_LARGE` | 413 | Descarga excede `INGEST_MAX_BYTES` |
