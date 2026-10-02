@@ -99,6 +99,15 @@ export interface IngestLimits {
 export interface IngestContext {
   now: Date;
   storageDir: string;
+  /**
+   * Id de la source que se está ingiriendo.
+   *
+   * `ingestion.md` §3 no lo lista pero §4.4 exige persistir el PDF en
+   * `STORAGE_DIR/<sourceId>/<timestamp>.pdf`, y sin el id la única forma de cumplirlo sería un
+   * directorio compartido entre sources, donde un archivo no se puede atribuir. Se prefiere
+   * completar el contrato antes que cumprir la ruta a costa de la trazabilidad.
+   */
+  sourceId: string;
   limits: IngestLimits;
 }
 

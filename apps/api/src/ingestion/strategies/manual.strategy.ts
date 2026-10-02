@@ -1,4 +1,3 @@
-import { parse } from 'csv-parse/sync';
 import { Injectable } from '@nestjs/common';
 
 import { SourceType } from '@datosapi/common';
@@ -7,13 +6,9 @@ import type { IngestResult, ManualSourceConfig, SourceConfig } from '@datosapi/c
 import { SourceConfigInvalidError, UnprocessableContentError } from '../errors/ingestion.errors';
 import { assertConfig } from '../helpers/json-payload';
 import type { IngestContext, IngestStrategy } from '../ingestion.types';
-import {
-  flattenJson,
-  headersFromRows,
-  maxWidthOf,
-  normalizeTable,
-} from '../normalization/tabular-normalizer';
-import type { RawCell, RawRow } from '../normalization/tabular-normalizer';
+import { flattenJson, headersFromRows, normalizeTable } from '../normalization/tabular-normalizer';
+import type { RawRow } from '../normalization/tabular-normalizer';
+import { parseCsvTable } from './csv-table';
 
 function isManualConfig(config: SourceConfig): config is ManualSourceConfig {
   if (!('format' in config) || !('payload' in config)) return false;
@@ -85,76 +80,23 @@ export class ManualIngestStrategy implements IngestStrategy {
   }
 
   private ingestCsv(config: ManualSourceConfig, ctx: IngestContext): IngestResult {
-    const hasHeaderRow = config.hasHeaderRow ?? true;
-
-    let records: RawRow[];
-
-    try {
-      records = parse(config.payload, {
-        bom: true,
-        skip_empty_lines: true,
-        relax_column_count: true,
-        // Siempre posicional: con `columns: true` `csv-parse` se come la primera fila como
-        // encabezado y deja los nombres fuera de alcance, y hace falta distinguir el
-        // encabezado de los datos para avisar cuando una fila trae menos celdas.
-        columns: false,
-        ...(config.delimiter === undefined || config.delimiter.length === 0
-          ? {}
-          : { delimiter: config.delimiter }),
-      }) as RawRow[];
-    } catch (error) {
-      throw new UnprocessableContentError(
-        `invalid CSV: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-
-    const [first] = records;
-
-    if (first === undefined) {
-      throw new UnprocessableContentError('El payload CSV no contiene filas de datos');
-    }
-
-    const body = hasHeaderRow ? records.slice(1) : records;
-
-    if (body.length === 0) {
-      throw new UnprocessableContentError(
-        hasHeaderRow
-          ? 'El payload CSV sólo contiene la fila de encabezado'
-          : 'El payload CSV no contiene filas de datos',
-      );
-    }
-
-    // Sin encabezado no hay nombres: `col_N` hasta el ancho de la fila más larga, que es
-    // lo que evita perder las columnas del final.
-    const headers = hasHeaderRow
-      ? (first as readonly RawCell[]).map((cell) => String(cell ?? ''))
-      : Array.from({ length: maxWidthOf(records) }, (_, index) => `col_${index + 1}`);
-
-    const warnings = hasHeaderRow ? this.warningsForColumnMismatch(body, headers.length) : [];
-    const table = normalizeTable(headers, body, { source: 'manual' });
+    const table = parseCsvTable(config.payload, {
+      source: 'manual',
+      subject: 'El payload CSV',
+      hasHeaderRow: config.hasHeaderRow ?? true,
+      ...(config.delimiter === undefined ? {} : { delimiter: config.delimiter }),
+    });
 
     return {
       rows: table.rows,
       schema: table.schema,
-      warnings: [...warnings, ...table.warnings],
-      meta: { method: 'csv-parse', rawRowCount: body.length, durationMs: elapsed(ctx) },
+      warnings: table.warnings,
+      meta: {
+        method: 'csv-parse',
+        rawRowCount: table.rows.length,
+        durationMs: elapsed(ctx),
+      },
     };
-  }
-
-  /**
-   * ingestion.md §4.4: una fila con menos celdas que el encabezado se completa con `null`
-   * (data-model.md §3.1 regla 5) y se deja constancia en `warnings`.
-   */
-  private warningsForColumnMismatch(rows: RawRow[], expected: number): string[] {
-    const warnings: string[] = [];
-
-    for (const [index, row] of rows.entries()) {
-      if (Array.isArray(row) && row.length !== expected) {
-        warnings.push(`row ${index + 1} had ${row.length} cells, expected ${expected}`);
-      }
-    }
-
-    return warnings;
   }
 
   /**

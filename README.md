@@ -229,7 +229,7 @@ por fase ni Pull Requests).
 | **02** | Backend base: NestJS, config, Swagger, salud | ✅ 2026-10-01 |
 | **03** | Esquemas Mongoose y repositorios | ✅ 2026-10-01 |
 | **04** | Ingesta manual + API externa | ✅ 2026-10-01 |
-| **05** | Ingesta PDF por coordenadas + caso AFIP | ⬜ |
+| **05** | Ingesta PDF por coordenadas + caso AFIP | ✅ 2026-10-02 |
 | **06** | Datasets versionados, publicación y catálogo | ⬜ |
 | **07** | Endpoints dinámicos (filtros, orden, paginación) | ⬜ |
 | **08** | Calidad, tests y verificación end-to-end | ⬜ |

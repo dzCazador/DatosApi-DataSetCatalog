@@ -15,7 +15,7 @@
 | Backend | NestJS | 11.x |
 | Base de datos | **MongoDB** | 7.x |
 | ODM | Mongoose | 8.x |
-| Extracción PDF | `pdfjs-dist` | 4.x |
+| Extracción PDF | `pdfjs-dist` | 3.x (build legacy) |
 | CSV | `csv-parse` | 5.x |
 | HTTP saliente | `fetch` nativo (Node 22) / `undici` | — |
 | Validación env (API) | `joi` | 18.x |
@@ -58,7 +58,7 @@ Mongoose +Aggregation Pipeline da control directo sobre documentos flexibles.
 
 | Paquete | Propósito | Nota |
 |---|---|---|
-| `pdfjs-dist` | Extraer texto **con coordenadas** de PDF | Preferido sobre `pdf-parse`: permite reconstruir tablas por posición x/y |
+| `pdfjs-dist` (build `legacy`) | Extraer texto **con coordenadas** de PDF | Preferido sobre `pdf-parse`: permite reconstruir tablas por posición x/y |
 | `csv-parse` | Parseo robusto de CSV (comillas, delimitadores, BOM) | Reemplaza cualquier parser casero |
 | `node:zlib` (builtin) | Descomprimir descargas gzip | — |
 | `fetch` (builtin, Node 22) | Descargas HTTP | Con `AbortSignal.timeout` |
@@ -67,6 +67,15 @@ Mongoose +Aggregation Pipeline da control directo sobre documentos flexibles.
 > posición de cada fragmento**, que es exactamente lo necesario para recomponer una tabla.
 > `pdfjs-dist` expone `getTextContent()` con `transform` (matriz de posición), lo que permite
 > agrupar fragmentos por línea (Y) y columna (X). Ver [`ingestion.md`](ingestion.md) §4.
+
+> **Por qué 3.x y no 4.x?** Desde la 4, `pdfjs-dist` es **ESM puro**: no hay build CommonJS, y
+> este backend compila a CommonJS (`tsc` con `module: commonjs`), así que `require()` falla con
+> `SyntaxError: Cannot use 'import.meta' outside a module`. La 3.11.x conserva el build `legacy`
+> CommonJS, que es el único importable desde acá. La API usada (`getDocument` + `getTextContent`)
+> no cambió entre 3 y 4, así que una migración futura es mecánica.
+>
+> La versión queda fijada en `package.json`; no se sube a `latest` porque el salto a ESM requiere
+> antes migrar el backend a ESM, que es un cambio de módulo de todo el proyecto.
 
 ### 2.4 Testing
 

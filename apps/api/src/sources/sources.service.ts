@@ -177,7 +177,7 @@ export class SourcesService {
 
     const previousStatus = source.status;
     await this.acquireIngestSlot(source);
-    const ctx = this.buildContext();
+    const ctx = this.buildContext(source);
 
     try {
       const version = await this.datasets.nextVersion(source.id);
@@ -226,14 +226,19 @@ export class SourcesService {
     throw new IngestAlreadyRunningError();
   }
 
-  private buildContext(): IngestContext {
+  private buildContext(source: SourceEntity): IngestContext {
     const limits: IngestLimits = {
       timeoutMs: this.config.getOrThrow('INGEST_TIMEOUT_MS'),
       maxBytes: this.config.getOrThrow('INGEST_MAX_BYTES'),
       maxRows: this.config.getOrThrow('INGEST_MAX_ROWS'),
     };
 
-    return { now: new Date(), storageDir: this.config.getOrThrow('STORAGE_DIR'), limits };
+    return {
+      now: new Date(),
+      storageDir: this.config.getOrThrow('STORAGE_DIR'),
+      sourceId: source.id,
+      limits,
+    };
   }
 
   private async createDataset(

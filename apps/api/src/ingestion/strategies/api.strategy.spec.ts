@@ -36,6 +36,7 @@ function ctx(): IngestContext {
   return {
     now: new Date(),
     storageDir: './storage',
+    sourceId: '68b1c2f0a1b2c3d4e5f60718',
     limits: { timeoutMs: 30_000, maxBytes: 10_485_760, maxRows: 50_000 },
   };
 }

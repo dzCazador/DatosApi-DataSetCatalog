@@ -43,7 +43,8 @@ export class CreateSourceDto {
   @ApiProperty({
     description:
       'Configuración del origen. La forma depende de `type`: `manual` exige ' +
-      '`format` (`json`|`csv`) y `payload`; `api` exige `url` y `method`.',
+      '`format` (`json`|`csv`) y `payload`; `api` exige `url` y `method`; ' +
+      '`url` y `pdf` exigen `url` y el PDF admite `pages`, `tableIndex` y `headerHints`.',
     type: 'object',
     additionalProperties: true,
     example: {

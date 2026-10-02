@@ -45,6 +45,7 @@ interface IngestStrategy {
 interface IngestContext {
   now: Date;
   storageDir: string;
+  sourceId: string;   // atribuye el binario persistido por §4.4
   limits: { timeoutMs: number; maxBytes: number; maxRows: number };
 }
 
@@ -165,6 +166,18 @@ sólo hay coma y está al final con 1–2 dígitos, es decimal; si sólo hay pun
 
 **Guardado del binario.** El PDF descargado se persiste en `STORAGE_DIR/<sourceId>/<timestamp>.pdf`
 para trazabilidad. **Nunca** se commitea al repo; `storage/` está en `.gitignore`.
+
+**Columnas por proyección.** Las columnas se detectan proyectando los fragmentos sobre el eje X
+y agrupando las regiones contiguas cubiertas, no comparando bordes izquierdos: las columnas
+numéricas suelen estar alineadas a la derecha, así que dos valores de la misma columna pueden
+empezar lejos y aun así solaparse, mientras que valores de columnas vecinas nunca solapan.
+
+**Encabezado de varias líneas.** El encabezado de una tabla real no suele ser una sola línea, y
+el de AFIP son cinco. Se lee como un bloque hacia arriba desde la primera fila de datos,
+mientras las líneas sean mayoritariamente no numéricas y estén a distancia de tabla; cada
+columna se nombra con todos los fragmentos que caen en ella, de arriba hacia abajo. Un rótulo
+que abarca varias columnas se asigna a todas las que toca y el desambiguado de duplicados las
+distingue (`..._2`), en lugar de dejar esas columnas como `col_N`.
 
 ---
 
